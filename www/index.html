@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html>
-
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <title>Snack Reviewer</title>
 
 <link rel="stylesheet" href="css/style.css">
 
-<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_KEY"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 </head>
 
@@ -17,39 +17,27 @@
 
 <div class="container">
 
-<h1>🍟 Snack Reviewer</h1>
+    <h1>🍟 Snack Reviewer</h1>
 
-<div id="map"></div>
+    <div id="map"></div>
 
-<div class="card">
+    <div class="card">
+        <input type="text" id="snack_name" placeholder="Snack Name">
+        <textarea id="review_text" placeholder="Write your review"></textarea>
 
-<input
-type="text"
-id="snack_name"
-placeholder="Snack Name">
+        <select id="rating">
+            <option value="1">⭐ 1 Star</option>
+            <option value="2">⭐⭐ 2 Stars</option>
+            <option value="3">⭐⭐⭐ 3 Stars</option>
+            <option value="4">⭐⭐⭐⭐ 4 Stars</option>
+            <option value="5">⭐⭐⭐⭐⭐ 5 Stars</option>
+        </select>
 
-<textarea
-id="review_text"
-placeholder="Write your review">
-</textarea>
+        <button onclick="saveReview()">Save Review</button>
+    </div>
 
-<select id="rating">
-<option value="1">⭐ 1 Star</option>
-<option value="2">⭐⭐ 2 Stars</option>
-<option value="3">⭐⭐⭐ 3 Stars</option>
-<option value="4">⭐⭐⭐⭐ 4 Stars</option>
-<option value="5">⭐⭐⭐⭐⭐ 5 Stars</option>
-</select>
-
-<button onclick="saveReview()">
-Save Review
-</button>
-
-</div>
-
-<h2>All Reviews</h2>
-
-<div id="reviewList"></div>
+    <h2>All Reviews</h2>
+    <div id="reviewList"></div>
 
 </div>
 
