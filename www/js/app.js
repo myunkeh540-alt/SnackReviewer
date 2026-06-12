@@ -1,128 +1,143 @@
 let latitude = "";
 let longitude = "";
 
-const API =
-"https://outlet-fleshed-sensuous.ngrok-free.dev/snackreviewer";
+let map;
+let marker;
 
-window.onload = function(){
+const GEOAPIFY_API_KEY = "843712b069214fbeb2c896a01dc4137e";
 
+const API = "https://impotency-ragweed-unfocused.ngrok-free.dev/snack_reviewer/";
+
+window.onload = function () {
     getLocation();
-
     loadReviews();
 };
 
-function getLocation(){
+function getLocation() {
 
-    navigator.geolocation.getCurrentPosition(
+    if (!navigator.geolocation) {
+        alert("Geolocation is not supported by this device.");
+        return;
+    }
 
-        function(position){
+    navigator.geolocation.watchPosition(
+        function (position) {
 
-            latitude =
-            position.coords.latitude;
+            latitude = position.coords.latitude;
+            longitude = position.coords.longitude;
 
-            longitude =
-            position.coords.longitude;
-
-            initMap();
-
+            if (!map) {
+                initMap();
+            } else {
+                updateMapLocation();
+            }
         },
+        function (error) {
 
-        function(error){
-
-            alert("Location Error");
+            if (error.code === error.PERMISSION_DENIED) {
+                alert("Permission denied. Please allow location in browser/app settings.");
+            }
+            else if (error.code === error.POSITION_UNAVAILABLE) {
+                alert("Location unavailable. Turn on phone GPS/location.");
+            }
+            else if (error.code === error.TIMEOUT) {
+                alert("Location timeout. Try again outside or enable high accuracy.");
+            }
+            else {
+                alert("Unknown location error.");
+            }
+        },
+        {
+            enableHighAccuracy: true,
+            maximumAge: 0,
+            timeout: 10000
         }
     );
 }
 
-function initMap(){
+function initMap() {
 
-    const myPos = {
+    map = L.map("map").setView([latitude, longitude], 15);
 
-        lat:parseFloat(latitude),
-        lng:parseFloat(longitude)
-    };
-
-    const map =
-    new google.maps.Map(
-        document.getElementById("map"),
+    L.tileLayer(
+        `https://maps.geoapify.com/v1/tile/osm-carto/{z}/{x}/{y}.png?apiKey=${GEOAPIFY_API_KEY}`,
         {
-            zoom:15,
-            center:myPos
+            maxZoom: 20,
+            attribution: "© OpenStreetMap contributors © Geoapify"
         }
-    );
+    ).addTo(map);
 
-    new google.maps.Marker({
-        position:myPos,
-        map:map,
-        title:"Current Location"
-    });
+    marker = L.marker([latitude, longitude])
+        .addTo(map)
+        .bindPopup("Current Location")
+        .openPopup();
 }
 
-function saveReview(){
+function updateMapLocation() {
 
-    const snack_name =
-    document.getElementById("snack_name").value;
+    marker.setLatLng([latitude, longitude]);
 
-    const review_text =
-    document.getElementById("review_text").value;
+    map.setView([latitude, longitude], 15);
+}
 
-    const rating =
-    document.getElementById("rating").value;
+function saveReview() {
 
-    const fd = new FormData();
+    const snack_name = document.getElementById("snack_name").value.trim();
+    const review_text = document.getElementById("review_text").value.trim();
+    const rating = document.getElementById("rating").value;
 
-    fd.append(
-        "snack_name",
-        snack_name
-    );
+    if (snack_name === "" || review_text === "") {
+        alert("Please fill in snack name and review.");
+        return;
+    }
 
-    fd.append(
-        "review_text",
-        review_text
-    );
+    if (latitude === "" || longitude === "") {
+        alert("Location not ready yet. Please wait.");
+        return;
+    }
+    
 
-    fd.append(
-        "rating",
-        rating
-    );
+    fetch(API + "insert.php", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            snack_name: snack_name,
+            review_text: review_text,
+            rating: rating,
+            latitude: latitude,
+            longitude: longitude
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
 
-    fd.append(
-        "latitude",
-        latitude
-    );
+        if (data.status === "success") {
+            alert("Review Saved");
 
-    fd.append(
-        "longitude",
-        longitude
-    );
+            document.getElementById("snack_name").value = "";
+            document.getElementById("review_text").value = "";
+            document.getElementById("rating").value = "1";
 
-    fetch(
-        API + "/insert.php",
-        {
-            method:"POST",
-            body:fd
+            loadReviews();
+        } else {
+            alert("Save failed: " + data.message);
         }
-    )
-    .then(res=>res.json())
-    .then(data=>{
-
-        alert("Review Saved");
-
-        loadReviews();
-
-    });
+    })
+    .catch(error => {
+    alert("Failed to save review: " + error.message);
+});
 }
 
 function loadReviews(){
 
     fetch(API + "/get_reviews.php")
-
     .then(res=>res.json())
-
     .then(data=>{
 
         let html = "";
-
+        
         data.forEach(item=>{
 
             html += `
@@ -165,30 +180,30 @@ function loadReviews(){
     });
 }
 
-function deleteReview(id){
+function deleteReview(id) {
 
-    if(!confirm(
-        "Delete this review?"
-    )) return;
+    if (!confirm("Delete this review?")) return;
 
-    const fd =
-    new FormData();
+    fetch(API + "delete.php", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            id: id
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
 
-    fd.append(
-        "id",
-        id
-    );
-
-    fetch(
-        API + "/delete.php",
-        {
-            method:"POST",
-            body:fd
+        if (data.status === "success") {
+            alert("Review Deleted");
+            loadReviews();
+        } else {
+            alert("Delete failed: " + data.message);
         }
-    )
-    .then(res=>res.json())
-    .then(data=>{
-
-        loadReviews();
+    })
+    .catch(error => {
+        alert("Failed to delete review.");
     });
 }
