@@ -5,30 +5,37 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Snack Reviewer</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
 <style>
-    /* --- CSS Variables --- */
+    /* --- Vibrant App Variables --- */
     :root {
-        --body-bg: #ffffff;      /* White background outside the phone */
-        --app-bg: #fdfbf7;       /* Cream background of the app screens */
-        --card-pink: #fad6d9;    /* Lighter pink for cards/accents */
-        --text-dark: #1a1a1a;    /* Almost black for high contrast text */
-        --text-muted: #888888;
+        --body-bg: #fff7ed;        /* Warm, soft cream background */
+        --app-bg: #ffffff;         /* Crisp white app surface */
+        --primary: #f97316;        /* Appetizing vibrant orange */
+        --primary-hover: #ea580c;  /* Slightly darker orange on hover */
+        --primary-light: #ffedd5;  /* Very soft orange for accents */
+        --text-dark: #1e293b;      /* Deep slate/navy for text */
+        --text-muted: #64748b;     /* Muted slate */
+        --border-color: #e2e8f0;   /* Light gray borders */
+        --input-bg: #f8fafc;       /* Cool off-white for inputs */
         --white: #ffffff;
     }
 
     /* --- Base Styles --- */
     body {
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Inter', sans-serif;
         background-color: var(--body-bg);
+        background-image: radial-gradient(circle at top right, #ffedd5, transparent 400px),
+                          radial-gradient(circle at bottom left, #ffe4e6, transparent 400px);
         margin: 0;
         padding: 0;
         display: flex;
         justify-content: center;
         align-items: center;
         min-height: 100vh;
+        color: var(--text-dark);
     }
 
     /* --- Mobile App Container --- */
@@ -37,8 +44,9 @@
         max-width: 400px; 
         background-color: var(--app-bg);
         min-height: 90vh;
-        border-radius: 40px;
-        box-shadow: 0 20px 50px rgba(0,0,0,0.15); 
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(249, 115, 22, 0.08), 0 1px 3px rgba(0,0,0,0.05); 
+        border: 1px solid rgba(249, 115, 22, 0.1);
         overflow: hidden;
         position: relative;
         margin: 20px;
@@ -46,19 +54,32 @@
         flex-direction: column;
     }
 
-    /* --- Header (Redesigned to match the masonry layout of the second picture) --- */
+    /* --- Header --- */
     .header {
-        background-color: transparent; /* Removed the pink box to match the clean cream look */
-        padding: 30px 24px 20px 24px;
-        text-align: center;
+        background-color: var(--white);
+        padding: 32px 24px 20px 24px;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+        position: relative;
+    }
+
+    /* Subtle top border accent */
+    .header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #f97316, #f43f5e);
     }
 
     /* Masonry Image Grid */
     .header-gallery {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        grid-template-rows: 120px 120px; /* Two rows of fixed height */
-        gap: 16px;
+        grid-template-rows: 100px 100px;
+        gap: 12px;
         margin-bottom: 24px;
     }
 
@@ -66,111 +87,124 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
-        border-radius: 20px;
-        box-shadow: 0 8px 16px rgba(0,0,0,0.06);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        transition: transform 0.3s ease;
     }
 
-    /* Make the first image span both rows (tall image on the left) */
+    .header-gallery img:hover {
+        transform: scale(1.02);
+    }
+
     .img-main {
         grid-row: span 2; 
     }
 
     .header h1 {
         margin: 0 0 4px 0;
-        font-size: 28px;
+        font-family: 'Outfit', sans-serif;
+        font-size: 26px;
         font-weight: 700;
         color: var(--text-dark);
-        letter-spacing: -0.5px;
+        letter-spacing: -0.02em;
     }
 
     .header p {
-        margin: 0 0 24px 0;
+        margin: 0 0 20px 0;
         font-size: 14px;
-        color: var(--text-muted);
+        color: var(--primary);
         font-weight: 500;
-    }
-
-    /* --- Input Field --- */
-    input[type="text"] {
-        width: 100%;
-        padding: 16px 20px;
-        border: none;
-        border-radius: 30px; 
-        font-family: 'Poppins', sans-serif;
-        font-size: 14px;
-        color: var(--text-dark);
-        background-color: var(--white);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.04);
-        box-sizing: border-box;
-        outline: none;
-    }
-
-    input::placeholder, textarea::placeholder {
-        color: #b0b0b0;
     }
 
     /* --- Main Content Area --- */
     .content {
-        padding: 0 24px 24px 24px;
+        padding: 24px;
         flex-grow: 1;
+        background-color: var(--app-bg);
     }
 
     /* --- Map Styling --- */
     #map {
-        height: 180px;
+        height: 160px;
         width: 100%;
-        background-color: #ddd;
-        border-radius: 24px;
+        background-color: var(--primary-light);
+        border-radius: 12px;
         margin-bottom: 24px;
         z-index: 1;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        border: 2px solid var(--white);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.04);
     }
 
     /* --- Form Elements --- */
-    textarea {
-        width: 100%;
-        padding: 16px 20px;
-        border: none;
-        border-radius: 20px;
-        font-family: 'Poppins', sans-serif;
-        font-size: 14px;
-        background-color: var(--card-pink);
+    label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 8px;
         color: var(--text-dark);
+    }
+
+    input[type="text"], 
+    textarea, 
+    select {
+        width: 100%;
+        padding: 14px 16px;
+        border: 1px solid var(--border-color);
+        border-radius: 10px; 
+        font-family: inherit;
+        font-size: 14px;
+        color: var(--text-dark);
+        background-color: var(--input-bg);
         box-sizing: border-box;
         outline: none;
-        margin-bottom: 16px;
+        transition: all 0.2s ease;
+        margin-bottom: 20px;
+    }
+
+    input[type="text"]:focus, 
+    textarea:focus, 
+    select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px var(--primary-light);
+        background-color: var(--white);
+    }
+
+    input::placeholder, textarea::placeholder {
+        color: #94a3b8;
+    }
+
+    textarea {
         resize: vertical;
-        min-height: 100px;
+        min-height: 110px;
     }
 
     select {
-        width: 100%;
-        padding: 16px 20px;
-        border: none;
-        border-radius: 20px;
-        font-family: 'Poppins', sans-serif;
-        font-size: 14px;
-        background-color: var(--card-pink);
-        color: var(--text-dark);
-        box-sizing: border-box;
-        outline: none;
-        margin-bottom: 24px;
         appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23f97316'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 14px center;
+        background-size: 16px;
+        padding-right: 40px;
     }
 
     /* --- Primary Button --- */
     button {
         width: 100%;
-        background-color: var(--text-dark);
+        background: linear-gradient(135deg, #f97316, #f43f5e);
         color: var(--white);
         border: none;
-        padding: 18px;
-        border-radius: 30px;
-        font-size: 16px;
+        padding: 16px;
+        border-radius: 12px;
+        font-size: 15px;
         font-weight: 600;
+        letter-spacing: 0.5px;
         cursor: pointer;
-        transition: transform 0.1s, background-color 0.2s;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        transition: transform 0.1s, box-shadow 0.2s;
+        box-shadow: 0 8px 16px rgba(249, 115, 22, 0.25);
+    }
+
+    button:hover {
+        box-shadow: 0 10px 20px rgba(249, 115, 22, 0.3);
     }
 
     button:active {
@@ -179,19 +213,38 @@
 
     /* --- Reviews Section --- */
     h2 {
+        font-family: 'Outfit', sans-serif;
         font-size: 18px;
         color: var(--text-dark);
         margin-top: 32px;
         margin-bottom: 16px;
-        font-weight: 600;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    h2::before {
+        content: '';
+        display: block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: var(--primary);
     }
 
     .review-item {
         background: var(--white);
-        padding: 16px;
-        border-radius: 20px;
-        margin-bottom: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        padding: 18px;
+        border-radius: 12px;
+        margin-bottom: 16px;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        transition: border-color 0.2s;
+    }
+    
+    .review-item:hover {
+        border-color: rgba(249, 115, 22, 0.3);
     }
 </style>
 </head>
@@ -202,32 +255,36 @@
     
     <div class="header">
         <div class="header-gallery">
-            <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=300&q=80" alt="Snack Main" class="img-main">
-            <img src="https://images.unsplash.com/photo-1511690656952-34342bb7c2f2?auto=format&fit=crop&w=300&q=80" alt="Snack Top Right">
-            <img src="https://images.unsplash.com/photo-1585647347384-2593bc35786b?auto=format&fit=crop&w=300&q=80" alt="Snack Bottom Right">
+            <img src="https://candybar.snackcrate.com/wp-content/uploads/2025/10/Hero_Image_Malaysia-min.png" alt="Malaysian Snacks Main" class="img-main">
+            <img src="https://m.media-amazon.com/images/I/71BAxvnXvEL._AC_UF894,1000_QL80_.jpg" alt="Snack Variety Top Right">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSIsAAPaEN33K3frcnNA0rk372ndrCuluPJew&s" alt="Snack Bottom Right">
         </div>
 
-        <h1>Food Finder</h1>
-        <p>Discover & review the best snacks</p>
-        <input type="text" id="snack_name" placeholder="What are you reviewing?">
+        <h1>Snack Reviewer</h1>
+        <p>Discover & review the best bites</p>
+        
+        <label for="snack_name">Snack Name</label>
+        <input type="text" id="snack_name" placeholder="E.g., Spicy Jalapeño Chips">
     </div>
 
     <div class="content">
         <div id="map"></div>
 
         <div class="card">
-            <textarea id="review_text" placeholder="Write your review here..."></textarea>
+            <label for="review_text">Your Experience</label>
+            <textarea id="review_text" placeholder="Detail the crunch, taste, and texture..."></textarea>
 
+            <label for="rating">Rating</label>
             <select id="rating">
                 <option value="" disabled selected>Select a Rating</option>
-                <option value="1">⭐ 1 Star</option>
-                <option value="2">⭐⭐ 2 Stars</option>
-                <option value="3">⭐⭐⭐ 3 Stars</option>
-                <option value="4">⭐⭐⭐⭐ 4 Stars</option>
-                <option value="5">⭐⭐⭐⭐⭐ 5 Stars</option>
+                <option value="1">⭐ Not Great</option>
+                <option value="2">⭐⭐ Okay</option>
+                <option value="3">⭐⭐⭐ Good</option>
+                <option value="4">⭐⭐⭐⭐ Very Good</option>
+                <option value="5">⭐⭐⭐⭐⭐ Craveable</option>
             </select>
 
-            <button onclick="saveReview()">Save Review</button>
+            <button onclick="saveReview()">Submit Review</button>
         </div>
 
         <h2>Recent Reviews</h2>
