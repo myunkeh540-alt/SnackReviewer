@@ -4,6 +4,12 @@
   <description/>
   <author/>
   <content src="index.html"/>
+  <access origin="*" />
+<allow-navigation href="*" />
+
+<allow-intent href="*" />
+
+<allow-navigation href="https://outlet-fleshed-sensuous.ngrok-free.dev/*" />
   <allow-navigation href="*"/>
   <preference name="DisallowOverscroll" value="true"/>
   <preference name="Orientation" value="default"/>
